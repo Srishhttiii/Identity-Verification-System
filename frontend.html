@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,6 +11,7 @@
       position: relative;
       display: inline-block;
     }
+
     .tooltip .tooltiptext {
       visibility: hidden;
       width: 220px;
@@ -26,17 +28,19 @@
       opacity: 0;
       transition: opacity 0.3s;
     }
+
     .tooltip:hover .tooltiptext {
       visibility: visible;
       opacity: 1;
     }
   </style>
 </head>
+
 <body class="bg-gradient-to-br from-blue-100 to-blue-300 text-gray-800 min-h-screen flex items-center justify-center">
   <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
     <h1 class="text-3xl font-bold text-center mb-6 text-blue-800">VERIFICATION</h1>
     <form id="verificationForm" class="space-y-5">
-      
+
       <!-- Aadhaar Upload -->
       <div>
         <label class="block font-medium text-gray-700 flex items-center">
@@ -45,8 +49,11 @@
             <span class="tooltiptext">Accepted formats: jpeg, jpg, png, pdf<br>Max size: 100MB</span>
           </div>
         </label>
-        <input type="file" id="aadhar" accept=".jpeg,.png,.pdf,.jpg" class="w-full mt-1 p-2 border rounded-md" required />
-        <p id="aadharError" class="text-red-500 text-sm hidden mt-1">Only jpeg, jpg, png, and pdf files are allowed within 100MB.</p>
+        <input type="file" id="aadhar" accept=".jpeg,.png,.pdf,.jpg" class="w-full mt-1 p-2 border rounded-md"
+          required />
+        <p id="aadharError" class="text-red-500 text-sm hidden mt-1">Only jpeg, jpg, png, and pdf files are allowed
+          within 100MB.</p>
+        <p id="aadharFeedback" class="mt-1 text-sm"></p>
       </div>
 
       <!-- Selfie Section -->
@@ -62,20 +69,25 @@
             </span>
           </div>
         </label>
-        
+
         <div class="space-y-2">
-          <button type="button" onclick="enableCamera()" id="open-camera" class="bg-blue-600 text-white px-4 py-2 rounded hover:text-blue-800">Take a selfie</button>
-          <video id="camera-stream" width="320" height="240" autoplay class="hidden rounded-lg border border-gray-300"></video>
+          <button type="button" onclick="enableCamera()" id="open-camera"
+            class="bg-blue-600 text-white px-4 py-2 rounded hover:text-blue-800">Take a selfie</button>
+          <video id="camera-stream" width="320" height="240" autoplay
+            class="hidden rounded-lg border border-gray-300"></video>
           <canvas id="snapshot" width="320" height="240" class="hidden rounded-lg border border-gray-300"></canvas>
-          
+
           <div class="flex gap-4">
-            <button type="button" id="capture-btn" onclick="capturePhoto()" class="hidden bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition">Click</button>
-            <button type="button" id="retake-btn" onclick="retakePhoto()" class="hidden bg-yellow-500 text-white px-6 py-2 rounded-full hover:bg-yellow-600 transition">Retake</button>
-            <button type="button" id="remove-btn" onclick="removePhoto()" class="hidden bg-red-500 text-white px-6 py-2 rounded-full hover:bg-red-600 transition">Remove</button>
+            <button type="button" id="capture-btn" onclick="capturePhoto()"
+              class="hidden bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition">Click</button>
+            <button type="button" id="retake-btn" onclick="retakePhoto()"
+              class="hidden bg-yellow-500 text-white px-6 py-2 rounded-full hover:bg-yellow-600 transition">Retake</button>
+            <button type="button" id="remove-btn" onclick="removePhoto()"
+              class="hidden bg-red-500 text-white px-6 py-2 rounded-full hover:bg-red-600 transition">Remove</button>
           </div>
 
-          <!-- Hidden field to track selfie -->
           <input type="hidden" id="selfieTaken" />
+          <p id="selfieFeedback" class="mt-1 text-sm"></p>
         </div>
       </div>
 
@@ -83,7 +95,8 @@
       <div class="flex items-start gap-2">
         <input type="checkbox" required class="mt-1" id="consent" />
         <label for="consent" class="text-gray-700 text-sm">
-          By submitting this form, I give my consent for this document to be used solely for the purpose of age and identity verification in accordance with the system’s terms and privacy policy.
+          By submitting this form, I give my consent for this document to be used solely for the purpose of age and
+          identity verification in accordance with the system’s terms and privacy policy.
         </label>
       </div>
 
@@ -95,6 +108,7 @@
   <script>
     const aadharInput = document.getElementById('aadhar');
     const aadharError = document.getElementById('aadharError');
+    const aadharFeedback = document.getElementById('aadharFeedback');
     const video = document.getElementById('camera-stream');
     const canvas = document.getElementById('snapshot');
     const context = canvas.getContext('2d');
@@ -103,22 +117,23 @@
     const removeBtn = document.getElementById('remove-btn');
     const openCameraBtn = document.getElementById('open-camera');
     const selfieTaken = document.getElementById('selfieTaken');
+    const selfieFeedback = document.getElementById('selfieFeedback');
 
     let mediaStream = null;
 
-    // Aadhaar file validation
     aadharInput.addEventListener('change', () => {
       const file = aadharInput.files[0];
-      const validTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+      const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
       if (!file || !validTypes.includes(file.type) || file.size > 100 * 1024 * 1024) {
         aadharError.classList.remove('hidden');
         aadharInput.value = '';
+        aadharFeedback.textContent = '';
       } else {
         aadharError.classList.add('hidden');
+        checkImageBlur(file, aadharFeedback);
       }
     });
 
-    // Enable camera
     function enableCamera() {
       navigator.mediaDevices.getUserMedia({ video: true })
         .then(stream => {
@@ -133,7 +148,6 @@
         });
     }
 
-    // Capture photo
     function capturePhoto() {
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
       canvas.classList.remove('hidden');
@@ -147,18 +161,23 @@
         mediaStream.getTracks().forEach(track => track.stop());
         video.srcObject = null;
       }
+
+      canvas.toBlob(blob => {
+        if (blob) {
+          checkImageBlur(blob, selfieFeedback);
+        }
+      }, 'image/png');
     }
 
-    // Retake photo
     function retakePhoto() {
       canvas.classList.add('hidden');
       retakeBtn.classList.add('hidden');
       removeBtn.classList.add('hidden');
       openCameraBtn.classList.remove('hidden');
       selfieTaken.value = "";
+      selfieFeedback.textContent = '';
     }
 
-    // Remove photo
     function removePhoto() {
       canvas.classList.add('hidden');
       context.clearRect(0, 0, canvas.width, canvas.height);
@@ -166,22 +185,96 @@
       removeBtn.classList.add('hidden');
       openCameraBtn.classList.remove('hidden');
       selfieTaken.value = "";
+      selfieFeedback.textContent = '';
     }
 
-    // Form submission
-    document.getElementById('verificationForm').onsubmit = function (e) {
-      e.preventDefault();
-      const allFilled = aadharInput.files.length &&
-                        selfieTaken.value &&
-                        document.getElementById('consent').checked;
+    async function checkImageBlur(fileOrBlob, feedbackElement) {
+      const formData = new FormData();
+      formData.append('image', fileOrBlob);
 
-      if (!allFilled) {
-        alert("Please fill all required fields.");
-        return;
+      try {
+        const response = await fetch('/check-image-blur', {
+          method: 'POST',
+          body: formData,
+        });
+        const data = await response.json();
+
+        if (data.error) {
+          feedbackElement.textContent = data.error;
+          feedbackElement.className = 'text-red-600 text-sm mt-1';
+        } else {
+          let message = "";
+          let isPoor = false;
+
+          if (data.blur_status === "Blurry") {
+            message += "The image appears blurry. ";
+            isPoor = true;
+          } else if (data.blur_status === "Moderate") {
+            message += "The image seems slightly blurry. ";
+            isPoor = true;
+          }
+
+          if (data.light_status === "Too Dark") {
+            message += "The lighting is too dark. ";
+            isPoor = true;
+          } else if (data.light_status === "Too Bright") {
+            message += "The lighting is too bright. ";
+            isPoor = true;
+          }
+
+          if (isPoor) {
+            message += "Please retake the picture with better lighting and clear focus.";
+            feedbackElement.className = "text-red-600 text-sm mt-1";
+          } else {
+            message = "Image quality is good.";
+            feedbackElement.className = "text-green-600 text-sm mt-1";
+          }
+
+          feedbackElement.textContent = message;
+        }
+      } catch (err) {
+        feedbackElement.textContent = 'Error checking image: ' + err.message;
+        feedbackElement.className = 'text-red-600 text-sm mt-1';
       }
+    }
 
-      alert("You are verified successfully!");
-    };
+    document.getElementById('verificationForm').onsubmit = function (e) {
+        e.preventDefault();
+
+        const aadharFile = aadharInput.files[0];
+        const consentChecked = document.getElementById('consent').checked;
+
+        if (!aadharFile || !selfieTaken.value || !consentChecked) {
+          alert("Please fill all required fields.");
+          return;
+        }
+
+        canvas.toBlob(async function (blob) {
+          const formData = new FormData();
+          formData.append('aadhar', aadharFile);
+          formData.append('selfie', blob, 'selfie.png');
+
+          try {
+            const response = await fetch('/verify', {
+              method: 'POST',
+              body: formData
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+              alert(`Verification ${data.match ? 'Successful' : 'Failed'}\nConfidence: ${data.confidence_score}%`);
+            } else {
+              alert("Error: " + (data.error || "Something went wrong"));
+            }
+
+          } catch (err) {
+            alert("Network error: " + err.message);
+          }
+        }, 'image/png');
+      };
+
   </script>
 </body>
+
 </html>
