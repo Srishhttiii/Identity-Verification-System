@@ -239,40 +239,40 @@
     }
 
     document.getElementById('verificationForm').onsubmit = function (e) {
-        e.preventDefault();
+      e.preventDefault();
 
-        const aadharFile = aadharInput.files[0];
-        const consentChecked = document.getElementById('consent').checked;
+      const aadharFile = aadharInput.files[0];
+      const consentChecked = document.getElementById('consent').checked;
 
-        if (!aadharFile || !selfieTaken.value || !consentChecked) {
-          alert("Please fill all required fields.");
-          return;
-        }
+      if (!aadharFile || !selfieTaken.value || !consentChecked) {
+        alert("Please fill all required fields.");
+        return;
+      }
 
-        canvas.toBlob(async function (blob) {
-          const formData = new FormData();
-          formData.append('aadhar', aadharFile);
-          formData.append('selfie', blob, 'selfie.png');
+      canvas.toBlob(async function (blob) {
+        const formData = new FormData();
+        formData.append('aadhar', aadharFile);
+        formData.append('selfie', blob, 'selfie.png');
 
-          try {
-            const response = await fetch('/verify', {
-              method: 'POST',
-              body: formData
-            });
+        try {
+          const response = await fetch('/verify', {
+            method: 'POST',
+            body: formData
+          });
 
-            const data = await response.json();
+          const data = await response.json();
 
-            if (response.ok) {
-              alert(`Verification ${data.match ? 'Successful' : 'Failed'}\nConfidence: ${data.confidence_score}%`);
-            } else {
-              alert("Error: " + (data.error || "Something went wrong"));
-            }
-
-          } catch (err) {
-            alert("Network error: " + err.message);
+          if (response.ok) {
+            alert(`Verification ${data.match ? 'Successful' : 'Failed'}\nConfidence: ${data.confidence_score}%`);
+          } else {
+            alert("Error: " + (data.error || "Something went wrong"));
           }
-        }, 'image/png');
-      };
+
+        } catch (err) {
+          alert("Network error: " + err.message);
+        }
+      }, 'image/png');
+    };
 
   </script>
 </body>
