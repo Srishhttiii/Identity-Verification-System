@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VERIFICATION</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari&display=swap" rel="stylesheet">
+  <style>
+    .tooltip {
+      position: relative;
+      display: inline-block;
+    }
+    .tooltip .tooltiptext {
+      visibility: hidden;
+      width: 220px;
+      background-color: #1a202c;
+      color: #fff;
+      text-align: left;
+      border-radius: 8px;
+      padding: 10px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .tooltip:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif, 'Noto Sans Devanagari';
+      background: linear-gradient(to right, #f8fafc, #e0f2fe);
+    }
+    
+  </style>
+</head>
+<body class="bg-gradient-to-br from-blue-100 to-blue-300 text-gray-800 min-h-screen flex items-center justify-center">
+  <div class="w-full px-4 py-6 max-w-5xl mx-auto flex flex-col gap-6">
+  <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-4xl mx-auto px-4 py-6 flex flex-col gap-6">
+    <h1 class="text-3xl font-bold text-center mb-6 text-blue-800">VERIFICATION</h1>
+    <form id="verificationForm" class="space-y-5">
+      <div>
+        <label class="block font-medium text-gray-700">Full Name</label>
+        <input type="text" placeholder="Your Name" required class="w-full mt-1 p-2 border rounded-md" id="fullName" />
+      </div>
+
+      <div>
+        <label class="block font-medium text-gray-700">Date of Birth</label>
+        <input type="date" required max="{{today}}" class="w-full mt-1 p-2 border rounded-md" id="dob" />
+      </div>
+
+      <div>
+        <label class="block font-medium text-gray-700 flex items-center">
+          Aadhar Document
+          <div class="tooltip ml-2 text-blue-600 cursor-pointer">&#9432;
+            <span class="tooltiptext">Accepted formats: jpeg, png, pdf<br>Max size: 100MB</span>
+          </div>
+        </label>
+        <input type="file" id="aadhar" accept=".jpeg,.png,.pdf,.jpg" class="w-full mt-1 p-2 border rounded-md" required />
+        <p id="aadharError" class="text-red-500 text-sm hidden mt-1">Only jpeg, png, and pdf files are allowed within 100MB.</p>
+      </div>
+
+      <div>
+        <label class="block font-medium text-gray-700 flex items-center">
+          Upload yor photo
+          <div class="tooltip ml-2 text-blue-600 cursor-pointer">&#9432;
+            <span class="tooltiptext">Use proper lighting, avoid virtual backgrounds, ensure clear visibility.</span>
+          </div>
+        </label>
+        <div class="space-y-2">
+          <video id="camera" width="100%" class="rounded-md hidden" autoplay></video>
+          <canvas id="snapshot" class="w-full rounded-md hidden"></canvas>
+          <div class="flex gap-2">
+            <button type="button" id="startCamera" class="bg-blue-600 text-white px-4 py-2 rounded">Take a selfie</button>
+            <button type="button" id="takePicture" class="bg-green-600 text-white px-4 py-2 rounded hidden">Take Picture</button>
+            <button type="button" id="retake" class="bg-yellow-500 text-white px-4 py-2 rounded hidden">Retake</button>
+          </div>
+        </div>
+        <input type="hidden" id="selfieTaken" />
+      </div>
+
+      <div class="flex items-center">
+        <input type="checkbox" required class="mr-2" id="consent" />
+        <label for="consent" class="text-gray-700 text-sm">By submitting this form, I give my consent for this document to be used solely for the purpose of age and identity verification in accordance with the system’s terms and privacy policy.</label>
+      </div>
+
+     <button type="submit" id="extract-button" class="bg-blue-700 text-white w-full py-2 rounded font-semibold">Verify</button>
+    </form>
+  </div>
+
+  <div class="bg-white mt-6 max-w-3xl p-6 rounded-xl shadow-md w-full">
+    <h2 class="text-xl font-semibold text-blue-800 mb-2">Verification Summary</h2>
+    <pre id="output" class="whitespace-pre-wrap text-gray-700 text-sm"></pre>
+  </div>
+  </div>
+
+ 
+
+  <script>
+    const aadharInput = document.getElementById('aadhar');
+    const aadharError = document.getElementById('aadharError');
+    const output = document.getElementById('output');
+
+    aadharInput.addEventListener('change', () => {
+      const file = aadharInput.files[0];
+      const validTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+      if (!file || !validTypes.includes(file.type) || file.size > 100 * 1024 * 1024) {
+        aadharError.classList.remove('hidden');
+        aadharInput.value = '';
+      } else {
+        aadharError.classList.add('hidden');
+      }
+    });
+
+    const camera = document.getElementById('camera');
+    const snapshot = document.getElementById('snapshot');
+    const startCamera = document.getElementById('startCamera');
+    const takePicture = document.getElementById('takePicture');
+    const retake = document.getElementById('retake');
+    const selfieTaken = document.getElementById('selfieTaken');
+
+    let stream;
+    startCamera.onclick = async () => {
+      stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      camera.srcObject = stream;
+      camera.classList.remove('hidden');
+      takePicture.classList.remove('hidden');
+    };
+
+    takePicture.onclick = () => {
+      const ctx = snapshot.getContext('2d');
+      snapshot.width = camera.videoWidth;
+      snapshot.height = camera.videoHeight;
+      ctx.drawImage(camera, 0, 0);
+      camera.classList.add('hidden');
+      takePicture.classList.add('hidden');
+      snapshot.classList.remove('hidden');
+      retake.classList.remove('hidden');
+      selfieTaken.value = 'true';
+      stream.getTracks().forEach(track => track.stop());
+    };
+
+    retake.onclick = async () => {
+      snapshot.classList.add('hidden');
+      retake.classList.add('hidden');
+      stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      camera.srcObject = stream;
+      camera.classList.remove('hidden');
+      takePicture.classList.remove('hidden');
+    };
+
+    document.getElementById('verificationForm').onsubmit = function (e) {
+      e.preventDefault();
+
+      const allFilled = document.getElementById('fullName').value &&
+                        document.getElementById('dob').value &&
+                        aadharInput.files.length &&
+                        selfieTaken.value &&
+                        document.getElementById('consent').checked;
+
+      if (!allFilled) {
+        output.textContent = "❌ Please fill all required fields.";
+        return;
+      }
+
+      uploadImage();
+    };
+
+    function uploadImage() {
+      const canvas = document.getElementById("snapshot");
+      canvas.toBlob(async (blob) => {
+        const formData = new FormData();
+        formData.append("fullName", document.getElementById("fullName").value);
+        formData.append("dob", document.getElementById("dob").value);
+        formData.append("aadhar", document.getElementById("aadhar").files[0]);
+        formData.append("selfie", blob, "selfie.jpg");
+
+        try {
+          const response = await fetch("http://localhost:5000/ocr/extract", {
+            method: "POST",
+            body: formData,
+          });
+
+          if (!response.ok) {
+            const error = await response.json();
+            output.textContent = `❌ Error: ${error.error || 'Something went wrong'}`;
+            return;
+          }
+
+          const result = await response.json();
+          output.innerHTML = `${
+  result.is_18_plus === true
+    ? '<span class="text-green-600 font-bold">The submitted document and photograph likely belong to the same individual, and the person meets the minimum age requirement (18+).</span>'
+    : result.is_18_plus === false
+    ? '<span class="text-red-600 font-semibold">Although the submitted document and photograph may belong to the same individual, the person does not meet the minimum age requirement (18+).</span>'
+    : '<span class="text-gray-600">N/A</span>'
+}`;
+
+        } catch (err) {
+          console.error(err);
+          output.textContent = "❌ Failed to connect to the server.";
+        }
+      }, "image/jpeg");
+    }
+    
+    // Set max date for DOB
+    document.getElementById('dob').max = new Date().toISOString().split("T")[0];
+  </script>
+</body>
+</html>
