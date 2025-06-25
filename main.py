@@ -7,11 +7,9 @@ app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# Analyze blur and lighting with moderate sensitivity thresholds
 def analyze_image(image_path):
     img_gray = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
     if img_gray is None:
-        # Return 4 values to match unpacking in endpoint
         return None, None, "Invalid image", "Invalid image"
 
     lap_var = cv2.Laplacian(img_gray, cv2.CV_64F).var()
@@ -22,13 +20,11 @@ def analyze_image(image_path):
     )
 
     brightness = img_gray.mean()
-    # Moderate lighting thresholds
-    if brightness < 50:
-        light_status = "Too Dark"
-    elif brightness > 200:
-        light_status = "Too Bright"
-    else:
-        light_status = "Good Lighting"
+    light_status = (
+        "Too Dark" if brightness < 50 else
+        "Too Bright" if brightness > 200 else
+        "Good Lighting"
+    )
 
     return lap_var, brightness, blur_status, light_status
 
