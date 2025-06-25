@@ -32,15 +32,15 @@ def extract():
         if not selfie_file:
             return jsonify({'error': 'No selfie image uploaded'}), 400
 
-        print(f"📥 Aadhar received: {aadhar_file.filename}")
-        print(f"📸 Selfie received: {selfie_file.filename}")
+        print(f"Aadhar received: {aadhar_file.filename}")
+        print(f"Selfie received: {selfie_file.filename}")
 
         aadhar_bytes = aadhar_file.read()
 
         try:
             text = extract_text_from_image(aadhar_bytes)
         except Exception as e:
-            print("❌ OCR error:", e)
+            print("OCR error:", e)
             return jsonify({'error': f"OCR Failed: {str(e)}"}), 500
 
         dob = extract_dob(text)
