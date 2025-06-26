@@ -19,7 +19,7 @@ def check_image_blur():
         temp_path = temp_file.name
         file.save(temp_path)
 
-    lap_var, brightness, blur_status, light_status = analyze_image(temp_path)
+    lap_var, brightness, blur_status , light_status = analyze_image(temp_path)
     os.remove(temp_path)
 
     if lap_var is None:
