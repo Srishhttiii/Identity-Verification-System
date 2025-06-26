@@ -134,3 +134,10 @@ This project lays the foundation for a robust AI-based identity verification fra
 -  **API-as-a-Service** to let other apps integrate this verification as a module  
 -  **Admin Dashboard** for analytics and audit trail of verifications
 
+---
+
+## 📂 Demo & Presentation
+
+You can view the complete presentation deck and demo video here:  
+👉 [Google Drive Folder](https://drive.google.com/drive/folders/1nOFM6RIINTnsKxvS3o98KzOZd0rKXHT1?usp=sharing)
+
