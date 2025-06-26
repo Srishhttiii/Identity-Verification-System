@@ -37,6 +37,7 @@
     <h1 class="text-3xl font-bold text-center mb-6 text-blue-800">VERIFICATION</h1>
     <form id="verificationForm" class="space-y-5">
 
+
       <!-- Aadhaar Upload -->
       <div>
         <label class="block font-medium text-gray-700 flex items-center">
@@ -49,6 +50,7 @@
         <p id="aadharError" class="text-red-500 text-sm hidden mt-1">Only jpeg, jpg, png, and pdf files are allowed within 100MB.</p>
         <p id="aadharFeedback" class="mt-1 text-sm"></p>
       </div>
+
 
       <!-- Selfie Section -->
       <div>
@@ -64,10 +66,12 @@
           </div>
         </label>
 
+
         <div class="space-y-2">
           <button type="button" onclick="enableCamera()" id="open-camera" class="bg-blue-600 text-white px-4 py-2 rounded hover:text-blue-800">Take a selfie</button>
           <video id="camera-stream" width="320" height="240" autoplay class="hidden rounded-lg border border-gray-300"></video>
           <canvas id="snapshot" width="320" height="240" class="hidden rounded-lg border border-gray-300"></canvas>
+
 
           <div class="flex gap-4">
             <button type="button" id="capture-btn" onclick="capturePhoto()" class="hidden bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition">Click</button>
@@ -75,10 +79,12 @@
             <button type="button" id="remove-btn" onclick="removePhoto()" class="hidden bg-red-500 text-white px-6 py-2 rounded-full hover:bg-red-600 transition">Remove</button>
           </div>
 
+
           <input type="hidden" id="selfieTaken" />
           <p id="selfieFeedback" class="mt-1 text-sm"></p>
         </div>
       </div>
+
 
       <!-- Consent Checkbox -->
       <div class="flex items-start gap-2">
@@ -88,10 +94,12 @@
         </label>
       </div>
 
+
       <!-- Submit Button -->
       <button type="submit" class="bg-blue-700 text-white w-full py-2 rounded font-semibold">Verify</button>
     </form>
   </div>
+
 
   <script>
     const aadharInput = document.getElementById('aadhar');
@@ -107,7 +115,9 @@
     const selfieTaken = document.getElementById('selfieTaken');
     const selfieFeedback = document.getElementById('selfieFeedback');
 
+
     let mediaStream = null;
+
 
     aadharInput.addEventListener('change', () => {
       const file = aadharInput.files[0];
@@ -121,6 +131,7 @@
         checkImageBlur(file, aadharFeedback);
       }
     });
+
 
     function enableCamera() {
       navigator.mediaDevices.getUserMedia({ video: true })
@@ -136,6 +147,7 @@
         });
     }
 
+
     function capturePhoto() {
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
       canvas.classList.remove('hidden');
@@ -145,10 +157,12 @@
       removeBtn.classList.remove('hidden');
       selfieTaken.value = "true";
 
+
       if (mediaStream) {
         mediaStream.getTracks().forEach(track => track.stop());
         video.srcObject = null;
       }
+
 
       canvas.toBlob(blob => {
         if (blob) {
@@ -156,6 +170,7 @@
         }
       }, 'image/png');
     }
+
 
     function retakePhoto() {
       canvas.classList.add('hidden');
@@ -165,6 +180,7 @@
       selfieTaken.value = "";
       selfieFeedback.textContent = '';
     }
+
 
     function removePhoto() {
       canvas.classList.add('hidden');
@@ -176,9 +192,11 @@
       selfieFeedback.textContent = '';
     }
 
+
     async function checkImageBlur(fileOrBlob, feedbackElement) {
       const formData = new FormData();
       formData.append('image', fileOrBlob);
+
 
       try {
         const response = await fetch('/check-image-blur', {
@@ -187,12 +205,14 @@
         });
         const data = await response.json();
 
+
         if (data.error) {
           feedbackElement.textContent = data.error;
           feedbackElement.className = 'text-red-600 text-sm mt-1';
         } else {
           let message = "";
           let isPoor = false;
+
 
           if (data.blur_status === "Blurry") {
             message += "The image appears blurry. ";
@@ -202,6 +222,7 @@
             isPoor = true;
           }
 
+
           if (data.light_status === "Too Dark") {
             message += "The lighting is too dark. ";
             isPoor = true;
@@ -209,6 +230,7 @@
             message += "The lighting is too bright. ";
             isPoor = true;
           }
+
 
           if (isPoor) {
             message += "Please retake the picture with better lighting and clear focus.";
@@ -218,6 +240,7 @@
             feedbackElement.className = "text-green-600 text-sm mt-1";
           }
 
+
           feedbackElement.textContent = message;
         }
       } catch (err) {
@@ -226,16 +249,19 @@
       }
     }
 
+
     document.getElementById('verificationForm').onsubmit = function (e) {
       e.preventDefault();
       const allFilled = aadharInput.files.length &&
                         selfieTaken.value &&
                         document.getElementById('consent').checked;
 
+
       if (!allFilled) {
         alert("Please fill all required fields.");
         return;
       }
+
 
       alert("You are verified successfully!");
     };
