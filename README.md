@@ -46,11 +46,11 @@ Ideal for digital KYC, age-restricted content access, or any application where u
 
 ##  Tech Stack
 
-| Layer         | Tech Used                            |
-|--------------|---------------------------------------|
-| **Frontend** | HTML5, JavaScript, CSS, Bootstrap     |
+| Layer         | Tech Used                                       |
+|--------------|-------------------------------------------------|
+| **Frontend** | HTML5, JavaScript, CSS, Bootstrap ,Tailwind CSS             |
 | **Backend**  | Flask (Python), OpenCV, Tesseract OCR, DeepFace |
-| **AI Models**| Facenet (via DeepFace), MTCNN         |
+| **AI Models**| Facenet (via DeepFace), MTCNN                   |
 
 ---
 
