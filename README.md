@@ -136,6 +136,51 @@ This project lays the foundation for a robust AI-based identity verification fra
 
 ---
 
+## 🚀 How to Run This Project Locally
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/Srishhttiii/Identity-Verification-System.git
+cd Identity-Verification-System
+```
+
+### 2. Create a Virtual Environment
+
+```bash
+python -m venv myenv
+```
+
+### 3. Activate the Environment
+
+**On Windows:**
+```bash
+myenv\Scripts\activate
+```
+
+**On macOS/Linux:**
+```bash
+source myenv/bin/activate
+```
+
+### 4. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 5. Run the Application
+
+```bash
+python main.py
+```
+
+### 6. Open your Browser
+
+Visit: [http://localhost:5000](http://localhost:5000)
+
+---
+
 ## 📂 Demo & Presentation
 
 You can view the complete presentation deck and demo video here:  
