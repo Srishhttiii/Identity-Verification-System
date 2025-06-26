@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from ocr_module.backend_ocr import extract_text_from_image, extract_dob
+from ocr_module.ocr_backend import extract_text_from_image, extract_dob
 from datetime import datetime
 
 
